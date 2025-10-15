@@ -1,0 +1,85 @@
+name: Build
+# simple build workflow for sanity check wheel binary, source distribution compilation and installation on various platforms with p3.8
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      save_artifacts:
+        description: 'Save artifacts from build'
+        required: true
+        default: 'false'
+        
+jobs:
+  build_whl:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-2019, macos-12, ubuntu-20.04]
+        python-version: [3.8]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        pip install wheel setuptools ninja numpy
+        pip install -r requirements-dev.txt
+    
+    - name: Build wheel
+      run: python setup.py bdist_wheel
+
+    - name: Install software
+      run: |
+        pip install numpy # install to get rid of warning
+        pip install --no-index --find-links=${{github.workspace}}/dist/ FastGeodis
+    - name: Run unittests
+      run: |
+        python -m unittest
+      
+    - name: Upload Python Dist
+      if: ${{ github.event.inputs.save_artifacts == 'true' }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: dist
+        path: dist/
+        if-no-files-found: error    
+
+  build_sdist:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        pip install wheel setuptools numpy
+        pip install -r requirements-dev.txt
+    
+    - name: Build source dist
+      run: python setup.py sdist
+
+    - name: Install software
+      run: |
+        pip install numpy # install to get rid of warning
+        pip install ${{github.workspace}}/dist/FastGeodis*.tar.gz
+    - name: Run unittests
+      run: |
+        python -m unittest
+      
+    - name: Upload Python Dist
+      if: ${{ github.event.inputs.save_artifacts == 'true' }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: dist
+        path: dist/
+        if-no-files-found: error
