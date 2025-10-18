@@ -59,6 +59,13 @@ torch::Tensor pairwise_geodesic2d_cuda(
     const float &l_grad,
     const float &l_eucl,
     const int &iterations);
+
+torch::Tensor mbd2d_cuda(
+    const torch::Tensor& image,   // (1,C,H,W) float32, on CUDA
+    const torch::Tensor& mask,    // (1,1,H,W) float32, 0 at seeds, 1 elsewhere
+    const float& v,               // initial large value, e.g., 1e6
+    const int& iterations         // number of full 4-direction iterations
+);
 #endif
 
 torch::Tensor generalised_geodesic2d_cpu(
@@ -311,3 +318,10 @@ torch::Tensor pairwise_geodesic2d(
     const float &l_eucl,
     const int &iterations);
 
+// Forward declaration of mbd
+torch::Tensor mbd2d(
+    const torch::Tensor& image,
+    const torch::Tensor& mask,
+    const float& v,
+    const int& iterations
+);

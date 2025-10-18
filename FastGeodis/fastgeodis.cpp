@@ -467,6 +467,19 @@ torch::Tensor pairwise_geodesic2d(const torch::Tensor &image, const float &v, co
     }
 }
 
+torch::Tensor mbd2d(const torch::Tensor& image,   // (1,C,H,W) float32, on CUDA
+    const torch::Tensor& mask,    // (1,1,H,W) float32, 0 at seeds, 1 elsewhere
+    const float& v,               // initial large value, e.g., 1e6
+    const int& iterations         // number of full 4-direction iterations)
+    ){
+        return mbd2d_cuda(
+            image,   // (1,C,H,W) float32, on CUDA
+            mask,    // (1,1,H,W) float32, 0 at seeds, 1 elsewhere
+            v,               // initial large value, e.g., 1e6
+            iterations         // number of full 4-direction iterations
+        );
+    }
+
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
 {
     m.def("generalised_geodesic2d", &generalised_geodesic2d, "Generalised Geodesic distance 2d");
@@ -498,5 +511,6 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
     m.def("GSF3d_pixelqueue", &GSF3d_pixelqueue, "Geodesic Symmetric Filtering 3d using Pixel Queue method");
     m.def("GSF2d_fastmarch", &GSF2d_fastmarch, "Geodesic Symmetric Filtering 2d using Fast Marching method");
     m.def("GSF3d_fastmarch", &GSF3d_fastmarch, "Geodesic Symmetric Filtering 3d using Fast Marching method");
-    
+
+    m.def("mbd2d", &mbd2d, "Minimum Barrier Distance 2d");
 }

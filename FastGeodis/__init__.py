@@ -109,6 +109,16 @@ def pairwise_geodesic2d(
         image, v, lamb, 1 - lamb, iter
     )
 
+def mbd2d(
+        image: torch.Tensor,
+        mask: torch.Tensor,
+        v: float,
+        iter: int,
+):
+    return FastGeodisCpp.mbd2d(
+        image, mask, v, iter
+    )
+
 def generalised_geodesic3d(
     image: torch.Tensor,
     softmask: torch.Tensor,
